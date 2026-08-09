@@ -116,13 +116,23 @@ void showCounter() {
     display.drawBitmap(0, 0, WED_BMP, WED_BMP_W, WED_BMP_H, GxEPD_BLACK);
 
     // rechte Haelfte: Zaehlung
+    // Zeilenabstaende sind auf die tatsaechliche Zeichenhoehe der Skript-Schriftart
+    // abgestimmt (Ober-/Unterlaengen), damit sich aufeinanderfolgende Zeilen nicht
+    // ueberlappen und der Block innerhalb des 300px hohen Displays bleibt.
     if (years <= 0) {
       printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes24pt7b);
       printCenteredAt(lineTage, RX, 190, &GreatVibes28pt7b);
+    } else if (days == 0) {
+      // Hochzeitstag (Jahrestag): statt der Tage eine Glueckwunsch-Zeile anzeigen
+      printCenteredAt("Verheiratet seit:", RX, 65, &GreatVibes18pt7b);
+      printCenteredAt(lineJahre, RX, 126, &GreatVibes28pt7b);
+      printCenteredAt("Herzlichen", RX, 176, &GreatVibes12pt7b);
+      printCenteredAt("Glueckwunsch", RX, 212, &GreatVibes12pt7b);
+      printCenteredAt("zum Hochzeitstag!", RX, 252, &GreatVibes12pt7b);
     } else {
-      printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes18pt7b);
-      printCenteredAt(lineJahre, RX, 150, &GreatVibes28pt7b);
-      printCenteredAt(lineTage, RX, 215, &GreatVibes28pt7b);
+      printCenteredAt("Verheiratet seit:", RX, 65, &GreatVibes18pt7b);
+      printCenteredAt(lineJahre, RX, 126, &GreatVibes28pt7b);
+      printCenteredAt(lineTage, RX, 200, &GreatVibes28pt7b);
     }
 
     printBatterySmall();
