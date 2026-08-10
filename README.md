@@ -35,7 +35,7 @@ stattdessen ein Fehlerbildschirm angezeigt, der zum Stellen der Uhr auffordert.
   festes "Jetzt"-Datum zum Testen erzwingen laesst. Fuer den Normalbetrieb
   muss diese Zeile entfernt/auskommentiert sein.
 
-### `set_rtc_time/`
+### `adjustRTC/`
 
 Einmal-Sketch, um die Uhrzeit auf dem RTC-Modul zu stellen. Er tut beim Boot
 nichts weiter, als die im Code hartcodierte Zeit (`SET_YEAR`, `SET_MONTH`,
@@ -43,9 +43,9 @@ nichts weiter, als die im Code hartcodierte Zeit (`SET_YEAR`, `SET_MONTH`,
 
 **Ablauf:**
 
-1. In [set_rtc_time/set_rtc_time.ino](set_rtc_time/set_rtc_time.ino) die
-   `SET_*`-Konstanten auf die gewuenschte Zeit setzen (idealerweise ein paar
-   Sekunden in der Zukunft, um Upload- und Boot-Dauer auszugleichen).
+1. In [adjustRTC/adjustRTC.ino](adjustRTC/adjustRTC.ino) die `SET_*`-Konstanten
+   auf die gewuenschte Zeit setzen (idealerweise ein paar Sekunden in der
+   Zukunft, um Upload- und Boot-Dauer auszugleichen).
 2. Sketch hochladen und einmal booten lassen (Board danach ausstecken oder
    neu starten reicht, es muss nicht weiterlaufen).
 3. Zur Kontrolle gibt der Sketch die neu gesetzte RTC-Zeit ueber die
@@ -55,6 +55,15 @@ nichts weiter, als die im Code hartcodierte Zeit (`SET_YEAR`, `SET_MONTH`,
 Die RTC (DS3231) hat eine eigene Pufferbatterie und behaelt die Zeit auch
 ohne Hauptstromversorgung, das Stellen ist also nur einmalig bzw. nach einem
 Batteriewechsel noetig.
+
+## Easter Eggs
+
+Ein paar versteckte Extras im Zaehler, die nicht sofort offensichtlich sind:
+
+- **Glueckwunsch zum Hochzeitstag** — Am Jahrestag selbst (`years >= 1` und
+  `days == 0`) zeigt das Display statt der Tage-Zeile die Meldung
+  "Herzlichen Glueckwunsch zum Hochzeitstag!" an
+  ([main/main.ino](main/main.ino), `showCounter()`).
 
 ## Schriften
 
