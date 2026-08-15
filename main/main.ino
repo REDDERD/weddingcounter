@@ -39,6 +39,61 @@ void printCenteredAt(const char* txt, int cx, int y, const GFXfont* font) {
   display.print(txt);
 }
 
+// ---- kleine "Emoji"-Icons (das Display ist s/w, echte Unicode-Emojis kann die
+// Schrift nicht darstellen -> stattdessen simple Vektor-Icons aus GFX-Formen) ----
+void drawHeartIcon(int cx, int cy, int r) {
+  int rr = r / 2;
+  display.fillCircle(cx - rr, cy - rr / 2, rr, GxEPD_BLACK);
+  display.fillCircle(cx + rr, cy - rr / 2, rr, GxEPD_BLACK);
+  display.fillTriangle(cx - r, cy - rr / 3, cx + r, cy - rr / 3, cx, cy + r, GxEPD_BLACK);
+}
+void drawSmirkIcon(int cx, int cy, int r) {
+  display.drawCircle(cx, cy, r, GxEPD_BLACK);
+  display.fillCircle(cx - r / 2, cy - r / 3, max(1, r / 6), GxEPD_BLACK);        // linkes Auge
+  display.drawLine(cx + r / 4, cy - r / 3, cx + r * 2 / 3, cy - r / 3, GxEPD_BLACK);  // rechtes Auge (Zwinkern)
+  display.drawLine(cx - r / 2, cy + r / 3, cx + r / 6, cy + r / 3, GxEPD_BLACK);      // Mund, flach...
+  display.drawLine(cx + r / 6, cy + r / 3, cx + r / 2, cy, GxEPD_BLACK);             // ...und schief hochgezogen
+}
+
+// Text zentriert um cx, gefolgt von einem kleinen Icon ('H' = Herz, 'S' = Smirk)
+void printCenteredWithIcon(const char* txt, int cx, int y, const GFXfont* font, char icon) {
+  display.setFont(font);
+  int16_t bx, by;
+  uint16_t bw, bh;
+  display.getTextBounds(txt, 0, 0, &bx, &by, &bw, &bh);
+  const int gap = 5;
+  const int iconR = bh / 2;
+  int totalW = bw + gap + iconR * 2;
+  int startX = cx - totalW / 2;
+  display.setCursor(startX - bx, y);
+  display.print(txt);
+  int iconCx = startX + bw + gap + iconR;
+  int iconCy = y + by + bh / 2;
+  if (icon == 'H') drawHeartIcon(iconCx, iconCy, iconR);
+  else if (icon == 'S') drawSmirkIcon(iconCx, iconCy, iconR);
+}
+
+// Riesige "42" fuer die linke Haelfte (ersetzt dort das Logo-Bitmap)
+void drawGiant42() {
+  display.setFont(&GreatVibes28pt7b);
+  const char* txt = "42";
+  int16_t bx, by;
+  uint16_t bw, bh;
+  int size = 4;
+  display.setTextSize(size);
+  display.getTextBounds(txt, 0, 0, &bx, &by, &bw, &bh);
+  if (bw > 190) {
+    size = 3;
+    display.setTextSize(size);
+    display.getTextBounds(txt, 0, 0, &bx, &by, &bw, &bh);
+  }
+  const int cx = 100;  // Mitte der linken Haelfte (0..200)
+  const int cy = 160;
+  display.setCursor(cx - bw / 2 - bx, cy - bh / 2 - by);
+  display.print(txt);
+  display.setTextSize(1);  // fuer nachfolgenden Text zuruecksetzen
+}
+
 // ---- Jahre + Resttage (schaltjahr-korrekt ueber echte Kalenderdaten) ----
 void computeYearsDays(DateTime now, int& years, long& days) {
   // ---- TEST: festes "Jetzt" erzwingen (zum Auskommentieren) ----
@@ -52,6 +107,12 @@ void computeYearsDays(DateTime now, int& years, long& days) {
   if (years < 0) years = 0;
   DateTime anniv(WED_YEAR + years, WED_MONTH, WED_DAY, 0, 0, 0);
   days = (now.unixtime() - anniv.unixtime()) / 86400L;
+}
+
+// ---- Tage bis zum naechsten Hochzeitstag (fuer den "Woche davor"-Hinweis) ----
+long daysUntilNextAnniversary(DateTime now, int years) {
+  DateTime nextAnniv(WED_YEAR + years + 1, WED_MONTH, WED_DAY, 0, 0, 0);
+  return (nextAnniv.unixtime() - now.unixtime()) / 86400L;
 }
 
 // ---- Akku ----
@@ -104,6 +165,14 @@ void showCounter() {
   if (days == 1) snprintf(lineTage, sizeof(lineTage), "1 Tag");
   else snprintf(lineTage, sizeof(lineTage), "%ld Tage", days);
 
+  // Easter Eggs unterhalb des Zaehlers/der Tage (nur wenn nicht gerade Hochzeitstag ist)
+  long daysUntilNext = daysUntilNextAnniversary(now, years);
+  bool weekBefore = (days != 0) && daysUntilNext >= 1 && daysUntilNext <= 7;
+  bool egg69 = (days == 69);
+  bool egg67 = (days == 67);
+  bool egg42 = (days == 42);
+  bool isValentine = (now.month() == 2 && now.day() == 14);
+
   const int RX = 300;  // Mitte der rechten Haelfte (200..400)
 
   display.setFullWindow();
@@ -112,8 +181,12 @@ void showCounter() {
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
 
-    // linke Haelfte: verzierter Schriftzug
-    display.drawBitmap(0, 0, WED_BMP, WED_BMP_W, WED_BMP_H, GxEPD_BLACK);
+    // linke Haelfte: verzierter Schriftzug (an Tag 42 stattdessen eine riesige "42")
+    if (egg42) {
+      drawGiant42();
+    } else {
+      display.drawBitmap(0, 0, WED_BMP, WED_BMP_W, WED_BMP_H, GxEPD_BLACK);
+    }
 
     // rechte Haelfte: Zaehlung
     // Zeilenabstaende sind auf die tatsaechliche Zeichenhoehe der Skript-Schriftart
@@ -122,17 +195,38 @@ void showCounter() {
     if (years <= 0) {
       printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes24pt7b);
       printCenteredAt(lineTage, RX, 190, &GreatVibes28pt7b);
+      if (egg69) {
+        printCenteredWithIcon("nice", RX, 225, &GreatVibes12pt7b, 'S');
+      } else if (egg67) {
+        printCenteredAt("six-seven", RX, 225, &GreatVibes12pt7b);
+      } else if (isValentine) {
+        printCenteredAt("Froehlichen", RX, 222, &GreatVibes12pt7b);
+        printCenteredWithIcon("Valentinstag", RX, 250, &GreatVibes12pt7b, 'H');
+      } else if (weekBefore) {
+        printCenteredAt("Samuel, Denk an", RX, 222, &GreatVibes9pt7b);
+        printCenteredAt("den Hochzeitstag!", RX, 247, &GreatVibes9pt7b);
+      }
     } else if (days == 0) {
       // Hochzeitstag (Jahrestag): statt der Tage eine Glueckwunsch-Zeile anzeigen
       printCenteredAt("Verheiratet seit:", RX, 65, &GreatVibes18pt7b);
       printCenteredAt(lineJahre, RX, 126, &GreatVibes28pt7b);
-      printCenteredAt("Herzlichen", RX, 176, &GreatVibes12pt7b);
-      printCenteredAt("Glueckwunsch", RX, 212, &GreatVibes12pt7b);
-      printCenteredAt("zum Hochzeitstag!", RX, 252, &GreatVibes12pt7b);
+      printCenteredAt("Alles Gute zum", RX, 190, &GreatVibes18pt7b);
+      printCenteredAt("Hochzeitstag!", RX, 230, &GreatVibes18pt7b);
     } else {
       printCenteredAt("Verheiratet seit:", RX, 65, &GreatVibes18pt7b);
       printCenteredAt(lineJahre, RX, 126, &GreatVibes28pt7b);
       printCenteredAt(lineTage, RX, 200, &GreatVibes28pt7b);
+      if (egg69) {
+        printCenteredWithIcon("nice", RX, 235, &GreatVibes12pt7b, 'S');
+      } else if (egg67) {
+        printCenteredAt("six-seven", RX, 235, &GreatVibes12pt7b);
+      } else if (isValentine) {
+        printCenteredAt("Froehlichen", RX, 232, &GreatVibes12pt7b);
+        printCenteredWithIcon("Valentinstag", RX, 260, &GreatVibes12pt7b, 'H');
+      } else if (weekBefore) {
+        printCenteredAt("Samuel, Denk an", RX, 232, &GreatVibes9pt7b);
+        printCenteredAt("den Hochzeitstag!", RX, 257, &GreatVibes9pt7b);
+      }
     }
 
     printBatterySmall();
