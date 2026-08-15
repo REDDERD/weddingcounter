@@ -49,10 +49,10 @@ void drawHeartIcon(int cx, int cy, int r) {
 }
 void drawSmirkIcon(int cx, int cy, int r) {
   display.drawCircle(cx, cy, r, GxEPD_BLACK);
-  display.fillCircle(cx - r / 2, cy - r / 3, max(1, r / 6), GxEPD_BLACK);        // linkes Auge
+  display.fillCircle(cx - r / 2, cy - r / 3, max(1, r / 6), GxEPD_BLACK);             // linkes Auge
   display.drawLine(cx + r / 4, cy - r / 3, cx + r * 2 / 3, cy - r / 3, GxEPD_BLACK);  // rechtes Auge (Zwinkern)
   display.drawLine(cx - r / 2, cy + r / 3, cx + r / 6, cy + r / 3, GxEPD_BLACK);      // Mund, flach...
-  display.drawLine(cx + r / 6, cy + r / 3, cx + r / 2, cy, GxEPD_BLACK);             // ...und schief hochgezogen
+  display.drawLine(cx + r / 6, cy + r / 3, cx + r / 2, cy, GxEPD_BLACK);              // ...und schief hochgezogen
 }
 
 // Text zentriert um cx, gefolgt von einem kleinen Icon ('H' = Herz, 'S' = Smirk)
@@ -96,10 +96,6 @@ void drawGiant42() {
 
 // ---- Jahre + Resttage (schaltjahr-korrekt ueber echte Kalenderdaten) ----
 void computeYearsDays(DateTime now, int& years, long& days) {
-  // ---- TEST: festes "Jetzt" erzwingen (zum Auskommentieren) ----
-  now = DateTime(2028, 8, 22, 12, 0, 0);
-  // -------------------------------------------------------------
-
   years = now.year() - WED_YEAR;
   if (now.month() < WED_MONTH || (now.month() == WED_MONTH && now.day() < WED_DAY)) {
     years--;
@@ -155,6 +151,9 @@ void printBatterySmall() {
 
 void showCounter() {
   DateTime now = rtc.now();
+  // ---- TEST: festes "Jetzt" erzwingen (zum Testen einkommentieren) ----
+now = DateTime(2028, 10, 28, 0, 0, 0);	
+  // -----------------------------------------------------------------
   int years;
   long days;
   computeYearsDays(now, years, days);
@@ -193,7 +192,7 @@ void showCounter() {
     // abgestimmt (Ober-/Unterlaengen), damit sich aufeinanderfolgende Zeilen nicht
     // ueberlappen und der Block innerhalb des 300px hohen Displays bleibt.
     if (years <= 0) {
-      printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes24pt7b);
+      printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes18pt7b);
       printCenteredAt(lineTage, RX, 190, &GreatVibes28pt7b);
       if (egg69) {
         printCenteredWithIcon("nice", RX, 225, &GreatVibes12pt7b, 'S');
