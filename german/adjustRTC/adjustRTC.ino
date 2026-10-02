@@ -15,10 +15,10 @@
 
 // ---- Zeit zum Setzen (24h-Format, lokale Zeit) ----
 #define SET_YEAR   2026
-#define SET_MONTH  1
+#define SET_MONTH  10
 #define SET_DAY    1
-#define SET_HOUR   12
-#define SET_MINUTE 0
+#define SET_HOUR   18
+#define SET_MINUTE 20
 #define SET_SECOND 0
 
 RTC_DS3231 rtc;

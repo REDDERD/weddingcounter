@@ -42,7 +42,7 @@ void printCenteredAt(const char* txt, int cx, int y, const GFXfont* font) {
 // ---- Jahre + Resttage (schaltjahr-korrekt ueber echte Kalenderdaten) ----
 void computeYearsDays(DateTime now, int& years, long& days) {
   // ---- TEST: festes "Jetzt" erzwingen (zum Auskommentieren) ----
-  now = DateTime(2028, 8, 22, 12, 0, 0);
+  // now = DateTime(2026, 8, 12, 12, 0, 0);
   // -------------------------------------------------------------
 
   years = now.year() - WED_YEAR;
