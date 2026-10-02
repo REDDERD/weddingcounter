@@ -18,7 +18,8 @@
 #define SCL_PIN 2
 #define VBAT_PIN 9
 
-// ---- set wedding date here ----
+// ##TODO1
+// ---- set wedding date here ---- 
 #define WED_YEAR 2025
 #define WED_MONTH 8
 #define WED_DAY 22
@@ -53,7 +54,6 @@ long daysUntilNextAnniversary(DateTime now, int years) {
   return (nextAnniv.unixtime() - now.unixtime()) / 86400L;
 }
 
-// ---- battery charge ----
 float readVbatt() {
   analogReadResolution(12);
   analogSetPinAttenuation(VBAT_PIN, ADC_11db);
@@ -93,6 +93,7 @@ void printBatterySmall() {
 
 void showCounter() {
   DateTime now = rtc.now();
+  // ##TODO2
   // ---- TEST: for testing set the date & time that should be simulated ----
   // now = DateTime(2028, 10, 28, 0, 0, 0);	// use this line for testing
   // -----------------------------------------------------------------
