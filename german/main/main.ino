@@ -18,7 +18,7 @@
 #define SCL_PIN 2
 #define VBAT_PIN 9
 
-// ---- Hochzeitsdatum ----
+// ---- set wedding date here ----
 #define WED_YEAR 2025
 #define WED_MONTH 8
 #define WED_DAY 22
@@ -29,7 +29,6 @@ GxEPD2_BW<GxEPD2_420_GDEY042T81, GxEPD2_420_GDEY042T81::HEIGHT> display(
   GxEPD2_420_GDEY042T81(SS, DC, RST, BUSY));
 RTC_DS3231 rtc;
 
-// Text um einen Mittelpunkt (cx) zentriert ausgeben
 void printCenteredAt(const char* txt, int cx, int y, const GFXfont* font) {
   display.setFont(font);
   int16_t bx, by;
@@ -39,12 +38,7 @@ void printCenteredAt(const char* txt, int cx, int y, const GFXfont* font) {
   display.print(txt);
 }
 
-// ---- Jahre + Resttage (schaltjahr-korrekt ueber echte Kalenderdaten) ----
 void computeYearsDays(DateTime now, int& years, long& days) {
-  // ---- TEST: festes "Jetzt" erzwingen (zum Auskommentieren) ----
-  // now = DateTime(2026, 8, 12, 12, 0, 0);
-  // -------------------------------------------------------------
-
   years = now.year() - WED_YEAR;
   if (now.month() < WED_MONTH || (now.month() == WED_MONTH && now.day() < WED_DAY)) {
     years--;
@@ -54,7 +48,12 @@ void computeYearsDays(DateTime now, int& years, long& days) {
   days = (now.unixtime() - anniv.unixtime()) / 86400L;
 }
 
-// ---- Akku ----
+long daysUntilNextAnniversary(DateTime now, int years) {
+  DateTime nextAnniv(WED_YEAR + years + 1, WED_MONTH, WED_DAY, 0, 0, 0);
+  return (nextAnniv.unixtime() - now.unixtime()) / 86400L;
+}
+
+// ---- battery charge ----
 float readVbatt() {
   analogReadResolution(12);
   analogSetPinAttenuation(VBAT_PIN, ADC_11db);
@@ -94,6 +93,9 @@ void printBatterySmall() {
 
 void showCounter() {
   DateTime now = rtc.now();
+  // ---- TEST: for testing set the date & time that should be simulated ----
+  // now = DateTime(2028, 10, 28, 0, 0, 0);	// use this line for testing
+  // -----------------------------------------------------------------
   int years;
   long days;
   computeYearsDays(now, years, days);
@@ -104,7 +106,7 @@ void showCounter() {
   if (days == 1) snprintf(lineTage, sizeof(lineTage), "1 Tag");
   else snprintf(lineTage, sizeof(lineTage), "%ld Tage", days);
 
-  const int RX = 300;  // Mitte der rechten Haelfte (200..400)
+  const int RX = 300;
 
   display.setFullWindow();
   display.firstPage();
@@ -112,28 +114,22 @@ void showCounter() {
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
 
-    // linke Haelfte: verzierter Schriftzug
-    display.drawBitmap(0, 0, WED_BMP, WED_BMP_W, WED_BMP_H, GxEPD_BLACK);
+      display.drawBitmap(0, 0, WED_BMP, WED_BMP_W, WED_BMP_H, GxEPD_BLACK);
 
-    // rechte Haelfte: Zaehlung
-    // Zeilenabstaende sind auf die tatsaechliche Zeichenhoehe der Skript-Schriftart
-    // abgestimmt (Ober-/Unterlaengen), damit sich aufeinanderfolgende Zeilen nicht
-    // ueberlappen und der Block innerhalb des 300px hohen Displays bleibt.
     if (years <= 0) {
-      printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes24pt7b);
+      printCenteredAt("Verheiratet seit:", RX, 120, &GreatVibes18pt7b);
       printCenteredAt(lineTage, RX, 190, &GreatVibes28pt7b);
     } else if (days == 0) {
       // Hochzeitstag (Jahrestag): statt der Tage eine Glueckwunsch-Zeile anzeigen
       printCenteredAt("Verheiratet seit:", RX, 65, &GreatVibes18pt7b);
       printCenteredAt(lineJahre, RX, 126, &GreatVibes28pt7b);
-      printCenteredAt("Herzlichen", RX, 176, &GreatVibes12pt7b);
-      printCenteredAt("Glueckwunsch", RX, 212, &GreatVibes12pt7b);
-      printCenteredAt("zum Hochzeitstag!", RX, 252, &GreatVibes12pt7b);
+      printCenteredAt("Alles Gute zum", RX, 190, &GreatVibes18pt7b);
+      printCenteredAt("Hochzeitstag!", RX, 230, &GreatVibes18pt7b);
     } else {
       printCenteredAt("Verheiratet seit:", RX, 65, &GreatVibes18pt7b);
       printCenteredAt(lineJahre, RX, 126, &GreatVibes28pt7b);
       printCenteredAt(lineTage, RX, 200, &GreatVibes28pt7b);
-    }
+      }
 
     printBatterySmall();
   } while (display.nextPage());
