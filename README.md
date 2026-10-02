@@ -30,10 +30,9 @@ stattdessen ein Fehlerbildschirm angezeigt, der zum Stellen der Uhr auffordert.
 
 **Vor dem Hochladen anpassen:**
 
-- `WED_YEAR`, `WED_MONTH`, `WED_DAY` — das Hochzeitsdatum
-- In `computeYearsDays()` gibt es eine auskommentierte Zeile, mit der sich ein
-  festes "Jetzt"-Datum zum Testen erzwingen laesst. Fuer den Normalbetrieb
-  muss diese Zeile entfernt/auskommentiert sein.
+- `WED_YEAR`, `WED_MONTH`, `WED_DAY` — das Hochzeitsdatum des Paares setzen (in main/main.ino markiert mit `##TODO1`)
+- Zum Testen gibt es eine vorgefertigte Zeile, die einkommentiert werden kann, hier kann hart ein Datum mit Uhrzeit gesetzt werden, das statt des Jetzt-Zeitpunkts zur Berechnung verwendet wird. (in main/main.ino markiert mit `##TODO2`)
+- Eigene Bitmap generieren und in main/bitmap.h einfügen, sodass die Namen des Paares eingeblendet werden.
 
 ### `adjustRTC/`
 
@@ -55,15 +54,6 @@ nichts weiter, als die im Code hartcodierte Zeit (`SET_YEAR`, `SET_MONTH`,
 Die RTC (DS3231) hat eine eigene Pufferbatterie und behaelt die Zeit auch
 ohne Hauptstromversorgung, das Stellen ist also nur einmalig bzw. nach einem
 Batteriewechsel noetig.
-
-## Easter Eggs
-
-Ein paar versteckte Extras im Zaehler, die nicht sofort offensichtlich sind:
-
-- **Glueckwunsch zum Hochzeitstag** — Am Jahrestag selbst (`years >= 1` und
-  `days == 0`) zeigt das Display statt der Tage-Zeile die Meldung
-  "Herzlichen Glueckwunsch zum Hochzeitstag!" an
-  ([main/main.ino](main/main.ino), `showCounter()`).
 
 ## Schriften
 
